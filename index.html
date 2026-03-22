@@ -31,10 +31,6 @@ body {
   font-size: 1.8em;
   z-index: 10;
 }
-
-canvas {
-  display: block;
-}
 </style>
 </head>
 
@@ -51,93 +47,47 @@ Play Music ❤️
   <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8b1c3e7b9.mp3">
 </audio>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r152/three.min.js"></script>
+<script type="module">
+import * as THREE from 'https://unpkg.com/three@0.152.2/build/three.module.js';
 
-<script>
 function playMusic() {
   document.getElementById("music").play();
 }
+window.playMusic = playMusic;
 
 // Scene
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x000000);
 
 // Camera
 const camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.1, 100);
 camera.position.z = 4;
 
-// Renderer (IMPORTANT FIX)
-const renderer = new THREE.WebGLRenderer({
-  antialias: true,
-  alpha: false,
-  powerPreference: "high-performance"
-});
+// Renderer
+const renderer = new THREE.WebGLRenderer({ antialias:true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-// STRONG lighting (so you actually SEE it)
-const light1 = new THREE.PointLight(0xffffff, 3);
-light1.position.set(2, 3, 5);
-scene.add(light1);
+// Light
+const light = new THREE.PointLight(0xffffff, 3);
+light.position.set(2, 3, 5);
+scene.add(light);
 
-const light2 = new THREE.PointLight(0xff0033, 3);
-light2.position.set(-2, -2, 4);
-scene.add(light2);
-
-// Rose (bigger + brighter)
-const geometry = new THREE.SphereGeometry(1.2, 64, 64);
-const material = new THREE.MeshStandardMaterial({
-  color: 0xff0033,
-  emissive: 0x220000,
-  roughness: 0.4
-});
-const rose = new THREE.Mesh(geometry, material);
+// Rose
+const rose = new THREE.Mesh(
+  new THREE.SphereGeometry(1.2, 64, 64),
+  new THREE.MeshStandardMaterial({ color: 0xff0033 })
+);
 scene.add(rose);
 
-// Petals
-const petals = [];
-for (let i = 0; i < 30; i++) {
-  const geo = new THREE.PlaneGeometry(0.2, 0.3);
-  const mat = new THREE.MeshBasicMaterial({
-    color: 0xff3366,
-    side: THREE.DoubleSide
-  });
-
-  const p = new THREE.Mesh(geo, mat);
-
-  p.position.set(
-    (Math.random() - 0.5) * 4,
-    Math.random() * 3,
-    (Math.random() - 0.5) * 4
-  );
-
-  p.speed = Math.random() * 0.02 + 0.01;
-
-  scene.add(p);
-  petals.push(p);
-}
-
-// Animation
+// Animate
 function animate() {
   requestAnimationFrame(animate);
-
   rose.rotation.y += 0.01;
-
-  petals.forEach(p => {
-    p.position.y -= p.speed;
-    p.rotation.z += 0.02;
-
-    if (p.position.y < -3) {
-      p.position.y = 3;
-    }
-  });
-
   renderer.render(scene, camera);
 }
-
 animate();
 
-// Resize fix
+// Resize
 window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
   camera.aspect = window.innerWidth/window.innerHeight;
