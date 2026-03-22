@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -61,4 +60,48 @@ body {
 
 @keyframes fall {
   0% { transform: translateY(-10vh); }
-  100% {
+  100% { transform: translateY(110vh); }
+}
+
+#musicBtn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="title">Karen te quiero mucho</div>
+<div id="bottomText">Te quiero ver cada minuto</div>
+
+<button id="musicBtn">Play Music ❤️</button>
+
+<audio id="music" loop>
+  <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8b1c3e7b9.mp3">
+</audio>
+
+<!-- Rose image -->
+<img id="rose" src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Red_rose.png/512px-Red_rose.png">
+
+<script>
+// MUSIC (guaranteed mobile play)
+document.body.addEventListener("click", () => {
+  document.getElementById("music").play();
+}, { once: true });
+
+// Create falling petals
+for (let i = 0; i < 30; i++) {
+  const petal = document.createElement("div");
+  petal.className = "petal";
+
+  petal.style.left = Math.random() * 100 + "vw";
+  petal.style.animationDuration = (3 + Math.random() * 5) + "s";
+
+  document.body.appendChild(petal);
+}
+</script>
+
+</body>
+</html>
