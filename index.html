@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -8,18 +9,18 @@
 body {
   margin: 0;
   overflow: hidden;
-  background: radial-gradient(circle, #1a0000, #000);
-  font-family: Arial;
+  background: black;
   color: white;
+  font-family: Arial;
 }
 
-/* Text */
 #title {
   position: absolute;
   top: 40px;
   width: 100%;
   text-align: center;
   font-size: 2.5em;
+  z-index: 10;
 }
 
 #bottomText {
@@ -28,45 +29,11 @@ body {
   width: 100%;
   text-align: center;
   font-size: 1.8em;
+  z-index: 10;
 }
 
-/* Rose */
-#rose {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 200px;
-  height: 200px;
-  transform: translate(-50%, -50%);
-  animation: rotate 10s linear infinite;
-  filter: drop-shadow(0 0 20px red);
-}
-
-/* Petals */
-.petal {
-  position: absolute;
-  width: 15px;
-  height: 20px;
-  background: radial-gradient(circle, #ff4d6d, #b3002d);
-  border-radius: 50%;
-  opacity: 0.8;
-  animation: fall linear infinite;
-}
-
-@keyframes rotate {
-  from { transform: translate(-50%, -50%) rotate(0deg); }
-  to { transform: translate(-50%, -50%) rotate(360deg); }
-}
-
-@keyframes fall {
-  0% { transform: translateY(-10vh); }
-  100% { transform: translateY(110vh); }
-}
-
-#musicBtn {
-  position: absolute;
-  top: 10px;
-  left: 10px;
+canvas {
+  display: block;
 }
 </style>
 </head>
@@ -76,31 +43,99 @@ body {
 <div id="title">Karen te quiero mucho</div>
 <div id="bottomText">Te quiero ver cada minuto</div>
 
-<button id="musicBtn">Play Music ❤️</button>
-
 <audio id="music" loop>
   <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8b1c3e7b9.mp3">
 </audio>
 
-<!-- Rose image -->
-<img id="rose" src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Red_rose.png/512px-Red_rose.png">
+<script type="module">
+import * as THREE from 'https://unpkg.com/three@0.152.2/build/three.module.js';
 
-<script>
-// MUSIC (guaranteed mobile play)
+// MOBILE MUSIC FIX
 document.body.addEventListener("click", () => {
   document.getElementById("music").play();
 }, { once: true });
 
-// Create falling petals
-for (let i = 0; i < 30; i++) {
-  const petal = document.createElement("div");
-  petal.className = "petal";
+// Scene
+const scene = new THREE.Scene();
 
-  petal.style.left = Math.random() * 100 + "vw";
-  petal.style.animationDuration = (3 + Math.random() * 5) + "s";
+// Camera (FIXED)
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 100);
+camera.position.z = 10;
 
-  document.body.appendChild(petal);
+// Renderer
+const renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// Lighting
+const light1 = new THREE.PointLight(0xffffff, 2);
+light1.position.set(3, 3, 5);
+scene.add(light1);
+
+const light2 = new THREE.PointLight(0xff0033, 2);
+light2.position.set(-3, -2, 4);
+scene.add(light2);
+
+// "Rose" (fixed size & position)
+const rose = new THREE.Mesh(
+  new THREE.SphereGeometry(0.8, 64, 64),
+  new THREE.MeshStandardMaterial({
+    color: 0xff0033,
+    roughness: 0.4
+  })
+);
+rose.position.y = -0.5;
+scene.add(rose);
+
+// Petals (VISIBLE now)
+const petals = [];
+for (let i = 0; i < 40; i++) {
+  const petal = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.2, 0.3),
+    new THREE.MeshBasicMaterial({
+      color: 0xff3366,
+      side: THREE.DoubleSide
+    })
+  );
+
+  petal.position.set(
+    (Math.random() - 0.5) * 6,
+    Math.random() * 4,
+    (Math.random() - 0.5) * 6
+  );
+
+  petal.speed = Math.random() * 0.02 + 0.01;
+
+  scene.add(petal);
+  petals.push(petal);
 }
+
+// Animation
+function animate() {
+  requestAnimationFrame(animate);
+
+  rose.rotation.y += 0.01;
+
+  petals.forEach(p => {
+    p.position.y -= p.speed;
+    p.rotation.z += 0.02;
+
+    if (p.position.y < -3) {
+      p.position.y = 4;
+    }
+  });
+
+  renderer.render(scene, camera);
+}
+
+animate();
+
+// Resize
+window.addEventListener('resize', () => {
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+});
 </script>
 
 </body>
