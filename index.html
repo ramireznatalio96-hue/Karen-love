@@ -1,291 +1,109 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8">
 <title>Karen ❤️</title>
 
-<!-- Preload de la imagen de fondo para evitar parpadeo al inicio -->
-photo.jpg
-
 <style>
-  :root{
-    /* Personalización rápida */
-    --bg-url: url('photo.jpg');
-    --txt-color: #ffffff;
-    --glow: #ff2a4f;
-    --glow-strong: #ff0033;
-    --shadow: rgba(0,0,0,0.35);
+body {
+  margin: 0;
+  overflow: hidden;
+  color: white;
+  font-family: Arial, sans-serif;
 
-    /* Tamaños fluidos y zonas seguras */
-    --rose-size: clamp(96px, 22dvw, 220px);
-    --title-size: clamp(22px, 5.2dvw, 44px);
-    --bottom-size: clamp(16px, 4.2dvw, 28px);
-    --safe-gap: clamp(16px, 6dvh, 40px);
-  }
+  /* BACKGROUND IMAGE */
+  background: url('photo.jpg') no-repeat center center fixed;
+  background-size: cover;
+  perspective: 1000px; /* 3D perspective for rotation */
+}
 
-  /* Reset básico */
-  * { box-sizing: border-box; }
-  html, body {
-    height: 100%;
-    margin: 0;
-    color: var(--txt-color);
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    background: #000; /* Fallback mientras carga la foto */
-    overflow: hidden; /* Evita scroll accidental durante animación */
-  }
+/* TOP TEXT */
+#title {
+  position: absolute;
+  top: 40px;
+  width: 100%;
+  text-align: center;
+  font-size: 2.5em;
+  z-index: 50;
+  text-shadow: 0 0 10px red, 0 0 20px red;
+}
 
-  /* Escenario a pantalla completa con perspectiva 3D */
-  .stage {
-    position: relative;
-    width: 100%;
-    height: 100dvh;             /* Usa dvh para cubrir viewport real en móvil */
-    perspective: 1000px;
-    overflow: hidden;
-    isolation: isolate;         /* Aísla capas para compositing más limpio */
-  }
+/* BOTTOM TEXT */
+#bottomText {
+  position: absolute;
+  bottom: 40px;
+  width: 100%;
+  text-align: center;
+  font-size: 1.6em;
+  z-index: 50;
+  text-shadow: 0 0 10px red;
+}
 
-  /* Fondo con overlay de degradado para legibilidad del texto */
-  .bg {
-    position: absolute;
-    inset: 0;
-    background:
-      linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.55)),
-      var(--bg-url) center/cover no-repeat fixed;
-    z-index: 1;
-    will-change: transform;
-  }
+/* ROTATING & FLOATING ROSE */
+#rose {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: 180px; /* size of the rose */
+  transform: translate(-50%, -50%);
+  z-index: 40; /* above petals, below text */
+  text-shadow:
+    0 0 5px #ff4d6d,
+    0 0 15px #ff1a3c,
+    0 0 30px #ff0033,
+    0 5px 15px rgba(0,0,0,0.5);
+  transform-style: preserve-3d;
+  animation: floatRotateY 5s ease-in-out infinite;
+}
 
-  /* Texto superior (título) */
-  #title {
-    position: absolute;
-    top: calc(var(--safe-gap) + env(safe-area-inset-top, 0px));
-    left: 50%;
-    transform: translateX(-50%);
-    width: min(92%, 1000px);
-    text-align: center;
-    font-size: var(--title-size);
-    line-height: 1.25;
-    text-shadow: 0 0 8px var(--glow), 0 0 18px var(--glow);
-    z-index: 50;
-  }
+/* FLOAT UP/DOWN + Y-ROTATION */
+@keyframes floatRotateY {
+  0%   { transform: translate(-50%, -50%) translateY(0) rotateY(0deg); }
+  25%  { transform: translate(-50%, -50%) translateY(-15px) rotateY(90deg); }
+  50%  { transform: translate(-50%, -50%) translateY(-30px) rotateY(180deg); }
+  75%  { transform: translate(-50%, -50%) translateY(-15px) rotateY(270deg); }
+  100% { transform: translate(-50%, -50%) translateY(0) rotateY(360deg); }
+}
 
-  /* Texto inferior */
-  #bottomText {
-    position: absolute;
-    bottom: calc(var(--safe-gap) + env(safe-area-inset-bottom, 0px));
-    left: 50%;
-    transform: translateX(-50%);
-    width: min(92%, 900px);
-    text-align: center;
-    font-size: var(--bottom-size);
-    line-height: 1.25;
-    text-shadow: 0 0 10px var(--glow);
-    z-index: 50;
-  }
+/* PETALS */
+.petal {
+  position: absolute;
+  width: 14px;
+  height: 18px;
+  background: radial-gradient(circle, #ff4d6d, #800020);
+  border-radius: 50% 50% 60% 60%;
+  animation: fall linear infinite;
+  z-index: 30; /* behind rose */
+}
 
-  /* Wrapper que garantiza centrado vertical y horizontal de la rosa */
-  #roseWrapper {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 40;          /* encima de pétalos, debajo de textos */
-    pointer-events: none; /* deja pasar clics si luego añades botones */
-  }
-
-  /* Rosa con animación (sin top/left/translate de centrado) */
-  #rose {
-    font-size: var(--rose-size);
-    transform-style: preserve-3d;
-    text-shadow:
-      0 0 5px #ff4d6d,
-      0 0 15px var(--glow),
-      0 0 30px var(--glow-strong),
-      0 6px 18px var(--shadow);
-    animation: floatRotateY 6s ease-in-out infinite;
-    will-change: transform;
-  }
-
-  /* La animación NO incluye translate(-50%,-50%); solo traslación Y y rotación Y */
-  @keyframes floatRotateY {
-    0%   { transform: translateY(0) rotateY(0deg); }
-    25%  { transform: translateY(-14px) rotateY(90deg); }
-    50%  { transform: translateY(-26px) rotateY(180deg); }
-    75%  { transform: translateY(-14px) rotateY(270deg); }
-    100% { transform: translateY(0) rotateY(360deg); }
-  }
-
-  /* Pétalos (capas y performance) */
-  .petal {
-    position: absolute;
-    width: 14px;
-    height: 18px;
-    background: radial-gradient(circle at 40% 40%, #ff6a85, #c0163d 65%, #800020 95%);
-    border-radius: 50% 50% 60% 60%;
-    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.45));
-    opacity: 0;
-    z-index: 30; /* detrás de la rosa */
-    animation:
-      fall var(--fall-dur, 6s) linear var(--fall-delay, 0s) infinite,
-      sway var(--sway-dur, 3.6s) ease-in-out var(--fall-delay, 0s) infinite;
-    will-change: transform, opacity;
-  }
-
-  /* Caída vertical con desvanecido */
-  @keyframes fall {
-    0%   { transform: translate3d(var(--x, 0), -12dvh, 0) rotate(var(--rot, 0deg)); opacity: 0; }
-    10%  { opacity: 1; }
-    100% { transform: translate3d(var(--x, 0), 112dvh, 0) rotate(calc(var(--rot, 0deg) + 180deg)); opacity: 0; }
-  }
-
-  /* Deriva lateral */
-  @keyframes sway {
-    0%, 100% { transform: translateX(-12px); }
-    50%      { transform: translateX(12px); }
-  }
-
-  /* Ajustes por orientación (opcional: acerca la rosa un poco en landscape) */
-  @media (orientation: landscape) {
-    :root { --rose-size: clamp(96px, 18dvw, 220px); }
-  }
-
-  /* Accesibilidad: respeta preferencia de reducir movimiento */
-  @media (prefers-reduced-motion: reduce) {
-    #rose, .petal { animation: none !important; }
-  }
-
-  /* === BLOQUE DE ESTILO DEL BOTÓN DE MÚSICA === */
-  .audio-btn {
-    position: absolute;
-    right: 16px;
-    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-    z-index: 60;
-    background: rgba(0,0,0,0.45);
-    color: #fff;
-    border: 1px solid rgba(255,255,255,0.35);
-    border-radius: 999px;
-    padding: 10px 14px;
-    font-size: 14px;
-    line-height: 1;
-    backdrop-filter: blur(6px);
-    cursor: pointer;
-    user-select: none;
-    touch-action: manipulation;
-  }
-  .audio-btn:active { transform: scale(0.98); }
+/* FALLING PETALS */
+@keyframes fall {
+  0% { transform: translateY(-10vh); opacity:0; }
+  20% { opacity:1; }
+  100% { transform: translateY(110vh); opacity:0; }
+}
 </style>
 </head>
 
 <body>
-  <div class="stage" role="img" aria-label="Pétalos cayendo sobre una foto de fondo con una rosa brillante centrada.">
-    <div class="bg" aria-hidden="true"></div>
 
-    <h1 id="title">Karen, te quiero mucho</h1>
+<div id="title">Karen te quiero mucho</div>
 
-    <!-- Rosa centrada por wrapper flex -->
-    <div id="roseWrapper" aria-hidden="true">
-      <div id="rose">🌹</div>
-    </div>
+<!-- ROTATING & FLOATING ROSE -->
+<div id="rose">🌹</div>
 
-    <div id="bottomText">Te quiero ver cada minuto</div>
+<div id="bottomText">Te quiero ver cada minuto</div>
 
-    <!-- === BLOQUE DE MÚSICA (BOTÓN) === -->
-    <button id="audioToggle" class="audio-btn" aria-pressed="false" aria-label="Reproducir música">🎵 Música</button>
-  </div>
-
-<!-- === BLOQUE DE SCRIPTS === -->
 <script>
-  // ========= Config responsive para pétalos =========
-  const isMobile = window.matchMedia('(max-width: 768px)').matches;
-  const PETAL_COUNT = isMobile ? 28 : 52;
-
-  const DUR_MIN = 5.0, DUR_MAX = 8.0;
-  const SWAY_MIN = 3.0, SWAY_MAX = 5.0;
-  const ROT_START = [-25, 25];
-  const X_DRIFT = [-20, 20];
-
-  const stage = document.querySelector('.stage');
-
-  // Generar pétalos como hijos de .stage (no del body) para respetar z-index
-  for (let i = 0; i < PETAL_COUNT; i++) {
-    const p = document.createElement('div');
-    p.className = 'petal';
-
-    // Posición horizontal inicial aleatoria
-    p.style.left = (Math.random() * 100).toFixed(2) + 'vw';
-
-    // Desfase de inicio para que no caigan sincronizados
-    p.style.setProperty('--fall-delay', (Math.random() * 4).toFixed(2) + 's');
-
-    // Duración de caída y deriva
-    p.style.setProperty('--fall-dur', (DUR_MIN + Math.random() * (DUR_MAX - DUR_MIN)).toFixed(2) + 's');
-    p.style.setProperty('--sway-dur', (SWAY_MIN + Math.random() * (SWAY_MAX - SWAY_MIN)).toFixed(2) + 's');
-
-    // Rotación inicial
-    p.style.setProperty('--rot', (ROT_START[0] + Math.random() * (ROT_START[1] - ROT_START[0])).toFixed(1) + 'deg');
-
-    // Deriva X extra
-    p.style.setProperty('--x', (X_DRIFT[0] + Math.random() * (X_DRIFT[1] - X_DRIFT[0])).toFixed(1) + 'px');
-
-    stage.appendChild(p);
-  }
-
-  // ========= BLOQUE DE MÚSICA =========
-  // Coloca un archivo 'music.mp3' junto a este HTML (o cambia la ruta a tu archivo real).
-  const audio = new Audio('music.mp3');
-  audio.loop = true;
-
-  const btn = document.getElementById('audioToggle');
-
-  // Compatibilidad iOS: prepara el contexto tras primer gesto
-  const enableAudioContext = () => {
-    // Intento de play silencioso para desbloquear el audio en iOS/Safari
-    audio.muted = true;
-    audio.play().then(() => {
-      audio.pause();
-      audio.currentTime = 0;
-      audio.muted = false;
-      window.removeEventListener('pointerdown', enableAudioContext, { passive: true });
-      window.removeEventListener('touchstart', enableAudioContext, { passive: true });
-      window.removeEventListener('click', enableAudioContext, { passive: true });
-    }).catch(() => {
-      // Si falla, no pasa nada; será desbloqueado al tocar el botón
-    });
-  };
-
-  window.addEventListener('pointerdown', enableAudioContext, { passive: true });
-  window.addEventListener('touchstart', enableAudioContext, { passive: true });
-  window.addEventListener('click', enableAudioContext, { passive: true });
-
-  // Control del botón
-  btn.addEventListener('click', async () => {
-    if (audio.paused) {
-      try {
-        await audio.play();
-        btn.textContent = '⏸️ Pausar';
-        btn.setAttribute('aria-pressed', 'true');
-        btn.setAttribute('aria-label', 'Pausar música');
-      } catch (e) {
-        console.warn('No se pudo reproducir audio:', e);
-        // Feedback mínimo al usuario
-        btn.textContent = '⚠️ Tocar de nuevo';
-      }
-    } else {
-      audio.pause();
-      btn.textContent = '🎵 Música';
-      btn.setAttribute('aria-pressed', 'false');
-      btn.setAttribute('aria-label', 'Reproducir música');
-    }
-  });
-
-  // Si el audio termina (por si no está en loop), actualiza estado del botón
-  audio.addEventListener('ended', () => {
-    btn.textContent = '🎵 Música';
-    btn.setAttribute('aria-pressed', 'false');
-    btn.setAttribute('aria-label', 'Reproducir música');
-  });
+// Generate falling petals
+for (let i = 0; i < 40; i++) {
+  const p = document.createElement("div");
+  p.className = "petal";
+  p.style.left = Math.random() * 100 + "vw";
+  p.style.animationDuration = (4 + Math.random()*4) + "s";
+  document.body.appendChild(p);
+}
 </script>
+
 </body>
-</html>
+</html>   
