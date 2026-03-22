@@ -31,6 +31,13 @@ body {
   font-size: 1.8em;
   z-index: 10;
 }
+
+#musicBtn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+}
 </style>
 </head>
 
@@ -39,9 +46,7 @@ body {
 <div id="title">Karen te quiero mucho</div>
 <div id="bottomText">Te quiero ver cada minuto</div>
 
-<button onclick="playMusic()" style="position:absolute;top:10px;left:10px;z-index:10;">
-Play Music ❤️
-</button>
+<button id="musicBtn">Play Music ❤️</button>
 
 <audio id="music" loop>
   <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8b1c3e7b9.mp3">
@@ -50,41 +55,82 @@ Play Music ❤️
 <script type="module">
 import * as THREE from 'https://unpkg.com/three@0.152.2/build/three.module.js';
 
-function playMusic() {
-  document.getElementById("music").play();
-}
-window.playMusic = playMusic;
+// MUSIC FIX (mobile-safe)
+const btn = document.getElementById("musicBtn");
+const music = document.getElementById("music");
+
+btn.addEventListener("click", () => {
+  music.play();
+});
 
 // Scene
 const scene = new THREE.Scene();
 
-// Camera
-const camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.1, 100);
-camera.position.z = 4;
+// Camera (FIXED ZOOM)
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 100);
+camera.position.z = 6; // farther so you SEE the rose
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({ antialias:true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-// Light
-const light = new THREE.PointLight(0xffffff, 3);
-light.position.set(2, 3, 5);
-scene.add(light);
+// Lighting (better)
+const light1 = new THREE.PointLight(0xffffff, 2);
+light1.position.set(3, 3, 5);
+scene.add(light1);
 
-// Rose
+const light2 = new THREE.PointLight(0xff0033, 2);
+light2.position.set(-3, -2, 4);
+scene.add(light2);
+
+// Rose (smaller so visible)
 const rose = new THREE.Mesh(
-  new THREE.SphereGeometry(1.2, 64, 64),
+  new THREE.SphereGeometry(1, 64, 64),
   new THREE.MeshStandardMaterial({ color: 0xff0033 })
 );
 scene.add(rose);
 
-// Animate
+// Petals (NOW VISIBLE)
+const petals = [];
+for (let i = 0; i < 40; i++) {
+  const petal = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.2, 0.3),
+    new THREE.MeshBasicMaterial({ color: 0xff3366, side: THREE.DoubleSide })
+  );
+
+  petal.position.set(
+    (Math.random() - 0.5) * 5,
+    Math.random() * 4,
+    (Math.random() - 0.5) * 5
+  );
+
+  petal.speed = Math.random() * 0.02 + 0.01;
+
+  scene.add(petal);
+  petals.push(petal);
+}
+
+// Animation
 function animate() {
   requestAnimationFrame(animate);
+
+  // rotate rose
   rose.rotation.y += 0.01;
+
+  // falling petals
+  petals.forEach(p => {
+    p.position.y -= p.speed;
+    p.rotation.z += 0.02;
+
+    if (p.position.y < -3) {
+      p.position.y = 4;
+    }
+  });
+
   renderer.render(scene, camera);
 }
+
 animate();
 
 // Resize
