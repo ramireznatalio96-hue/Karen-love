@@ -1,110 +1,242 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Karen ❤️</title>
 
+<!-- Preload de la imagen de fondo para evitar parpadeos -->
+<link.jpg
+
 <style>
-body {
-  margin: 0;
-  overflow: hidden;
-  color: white;
-  font-family: Arial, sans-serif;
+  :root{
+    --bg-url: url('photo.jpg');
+    --txt-color: #ffffff;
+    --glow: #ff2a4f;
+    --glow-strong: #ff0033;
+    --shadow: rgba(0,0,0,0.35);
+    --rose-size: clamp(90px, 18vw, 200px);
+    --title-size: clamp(22px, 4.5vw, 44px);
+    --bottom-size: clamp(16px, 3.2vw, 28px);
+    --safe-gap: clamp(16px, 4vh, 40px);
+  }
 
-  /* BACKGROUND IMAGE */
-  background: url('photo.jpg') no-repeat center center fixed;
-  background-size: cover;
-  perspective: 1000px; /* 3D perspective for rotation */
-}
+  * { box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    color: var(--txt-color);
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    background: #000; /* fallback sólido si la imagen tarda */
+  }
 
-/* TOP TEXT */
-#title {
-  position: absolute;
-  top: 40px;
-  width: 100%;
-  text-align: center;
-  font-size: 2.5em;
-  z-index: 50;
-  text-shadow: 0 0 10px red, 0 0 20px red;
-}
+  /* Escenario con perspectiva para la rotación 3D */
+  .stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    perspective: 1000px;
+    overflow: hidden;
+    isolation: isolate;
+  }
 
-/* BOTTOM TEXT */
-#bottomText {
-  position: absolute;
-  bottom: 40px;
-  width: 100%;
-  text-align: center;
-  font-size: 1.6em;
-  z-index: 50;
-  text-shadow: 0 0 10px red;
-}
+  /* Fondo con foto + overlay para mejorar legibilidad */
+  .bg {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.55)),
+      var(--bg-url) center/cover no-repeat fixed;
+    will-change: transform;
+    z-index: 1;
+  }
 
-/* ROTATING & FLOATING ROSE */
-#rose {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  font-size: 180px; /* size of the rose */
-  transform: translate(-50%, -50%);
-  z-index: 40; /* above petals, below text */
-  text-shadow:
-    0 0 5px #ff4d6d,
-    0 0 15px #ff1a3c,
-    0 0 30px #ff0033,
-    0 5px 15px rgba(0,0,0,0.5);
-  transform-style: preserve-3d;
-  animation: floatRotateY 5s ease-in-out infinite;
-}
+  /* Texto superior */
+  #title {
+    position: absolute;
+    top: var(--safe-gap);
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(92%, 1000px);
+    text-align: center;
+    font-size: var(--title-size);
+    text-shadow:
+      0 0 8px var(--glow),
+      0 0 18px var(--glow);
+    z-index: 50;
+  }
 
-/* FLOAT UP/DOWN + Y-ROTATION */
-@keyframes floatRotateY {
-  0%   { transform: translate(-50%, -50%) translateY(0) rotateY(0deg); }
-  25%  { transform: translate(-50%, -50%) translateY(-15px) rotateY(90deg); }
-  50%  { transform: translate(-50%, -50%) translateY(-30px) rotateY(180deg); }
-  75%  { transform: translate(-50%, -50%) translateY(-15px) rotateY(270deg); }
-  100% { transform: translate(-50%, -50%) translateY(0) rotateY(360deg); }
-}
+  /* Texto inferior */
+  #bottomText {
+    position: absolute;
+    bottom: var(--safe-gap);
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(92%, 900px);
+    text-align: center;
+    font-size: var(--bottom-size);
+    text-shadow: 0 0 10px var(--glow);
+    z-index: 50;
+  }
 
-/* PETALS */
-.petal {
-  position: absolute;
-  width: 14px;
-  height: 18px;
-  background: radial-gradient(circle, #ff4d6d, #800020);
-  border-radius: 50% 50% 60% 60%;
-  animation: fall linear infinite;
-  z-index: 30; /* behind rose */
-}
+  /* Wrapper que mantiene la rosa centrada SIEMPRE (evita conflictos de transform) */
+  #roseWrapper {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;     /* centro vertical */
+    justify-content: center; /* centro horizontal */
+    z-index: 40;             /* encima de pétalos, debajo del texto */
+    pointer-events: none;    /* clics pasan a través si agregas interacciones */
+  }
 
-/* FALLING PETALS */
-@keyframes fall {
-  0% { transform: translateY(-10vh); opacity:0; }
-  20% { opacity:1; }
-  100% { transform: translateY(110vh); opacity:0; }
-}
+  /* Rosa flotante y girando (la animación NO hace centering, solo translateY/rotateY) */
+  #rose {
+    font-size: var(--rose-size);
+    transform-style: preserve-3d;
+    text-shadow:
+      0 0 5px #ff4d6d,
+      0 0 15px var(--glow),
+      0 0 30px var(--glow-strong),
+      0 6px 18px var(--shadow);
+    animation: floatRotateY 6s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  /* Flotación vertical + rotación Y (sin translate(-50%,-50%)) */
+  @keyframes floatRotateY {
+    0%   { transform: translateY(0) rotateY(0deg); }
+    25%  { transform: translateY(-14px) rotateY(90deg); }
+    50%  { transform: translateY(-26px) rotateY(180deg); }
+    75%  { transform: translateY(-14px) rotateY(270deg); }
+    100% { transform: translateY(0) rotateY(360deg); }
+  }
+
+  /* Pétalos */
+  .petal {
+    position: absolute;
+    width: 14px;
+    height: 18px;
+    background: radial-gradient(circle at 40% 40%, #ff6a85, #c0163d 65%, #800020 95%);
+    border-radius: 50% 50% 60% 60%;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.45));
+    opacity: 0;
+    z-index: 30; /* detrás de la rosa */
+    animation:
+      fall var(--fall-dur, 6s) linear var(--fall-delay, 0s) infinite,
+      sway var(--sway-dur, 3.6s) ease-in-out var(--fall-delay, 0s) infinite;
+    will-change: transform, opacity;
+  }
+
+  /* Caída vertical con desvanecido */
+  @keyframes fall {
+    0%   { transform: translate3d(var(--x, 0), -12vh, 0) rotate(var(--rot, 0deg)); opacity: 0; }
+    10%  { opacity: 1; }
+    100% { transform: translate3d(var(--x, 0), 112vh, 0) rotate(calc(var(--rot, 0deg) + 180deg)); opacity: 0; }
+  }
+
+  /* Deriva lateral suave */
+  @keyframes sway {
+    0%, 100% { transform: translateX(-12px); }
+    50%      { transform: translateX(12px); }
+  }
+
+  /* Respeta preferencia del usuario de reducir movimiento */
+  @media (prefers-reduced-motion: reduce) {
+    #rose, .petal {
+      animation: none !important;
+    }
+  }
+
+  /* Botón opcional para música (oculto por defecto) */
+  .audio-btn {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    z-index: 60;
+    background: rgba(0,0,0,0.45);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 999px;
+    padding: 10px 14px;
+    font-size: 14px;
+    backdrop-filter: blur(6px);
+    cursor: pointer;
+    display: none; /* Cambia a block si habilitas audio */
+  }
 </style>
 </head>
 
 <body>
+  <div class="stage" role="img" aria-label="Pétalos cayendo sobre una foto de fondo con una rosa brillante en el centro.">
+    <div class="bg" aria-hidden="true"></div>
 
-<div id="title">Karen te quiero mucho</div>
+    <h1 id="title">Karen, te quiero mucho</h1>
 
-<!-- ROTATING & FLOATING ROSE -->
-<div id="rose">🌹</div>
+    <!-- Wrapper centrador: evita que la animación rompa el centrado -->
+    <div id="roseWrapper" aria-hidden="true">
+      <div id="rose">🌹</div>
+    </div>
 
-<div id="bottomText">Te quiero ver cada minuto</div>
+    <div id="bottomText">Te quiero ver cada minuto</div>
+
+    <!-- Botón opcional de audio -->
+    <button id="audioToggle" class="audio-btn" aria-pressed="false">🎵 Música</button>
+  </div>
 
 <script>
-// Generate falling petals
-for (let i = 0; i < 40; i++) {
-  const p = document.createElement("div");
-  p.className = "petal";
-  p.style.left = Math.random() * 100 + "vw";
-  p.style.animationDuration = (4 + Math.random()*4) + "s";
-  document.body.appendChild(p);
-}
-</script>
+  // ====== Configuración de pétalos ======
+  const PETAL_COUNT = 48;               // cantidad
+  const DUR_MIN = 5.0, DUR_MAX = 8.0;   // duración de caída
+  const SWAY_MIN = 3.0, SWAY_MAX = 5.0; // duración de deriva
+  const ROT_START = [-25, 25];          // rotación inicial
+  const X_DRIFT = [-20, 20];            // deriva X adicional
 
+  // Generar pétalos con variaciones
+  for (let i = 0; i < PETAL_COUNT; i++) {
+    const p = document.createElement('div');
+    p.className = 'petal';
+
+    // Posición horizontal inicial aleatoria
+    p.style.left = (Math.random() * 100).toFixed(2) + 'vw';
+
+    // Desfase de inicio para que no caigan sincronizados
+    p.style.setProperty('--fall-delay', (Math.random() * 4).toFixed(2) + 's');
+
+    // Duración de caída y deriva
+    p.style.setProperty('--fall-dur', (DUR_MIN + Math.random() * (DUR_MAX - DUR_MIN)).toFixed(2) + 's');
+    p.style.setProperty('--sway-dur', (SWAY_MIN + Math.random() * (SWAY_MAX - SWAY_MIN)).toFixed(2) + 's');
+
+    // Rotación inicial
+    p.style.setProperty('--rot', (ROT_START[0] + Math.random() * (ROT_START[1] - ROT_START[0])).toFixed(1) + 'deg');
+
+    // Deriva X extra
+    p.style.setProperty('--x', (X_DRIFT[0] + Math.random() * (X_DRIFT[1] - X_DRIFT[0])).toFixed(1) + 'px');
+
+    document.body.appendChild(p);
+  }
+
+  // ====== (Opcional) Música: descomentar y añadir 'music.mp3' ======
+  // const audio = new Audio('music.mp3');
+  // audio.loop = true;
+  // const btn = document.getElementById('audioToggle');
+  // btn.style.display = 'block';
+  // btn.addEventListener('click', async () => {
+  //   if (audio.paused) {
+  //     try {
+  //       await audio.play();
+  //       btn.textContent = '⏸️ Pausar';
+  //       btn.setAttribute('aria-pressed', 'true');
+  //     } catch (e) {
+  //       console.warn('No se pudo reproducir audio:', e);
+  //     }
+  //   } else {
+  //     audio.pause();
+  //     btn.textContent = '🎵 Música';
+  //     btn.setAttribute('aria-pressed', 'false');
+  //   }
+  // });
+</script>
 </body>
 </html>
