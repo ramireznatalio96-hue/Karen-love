@@ -15,7 +15,7 @@ body {
   /* BACKGROUND IMAGE */
   background: url('photo.jpg') no-repeat center center fixed;
   background-size: cover;
-  perspective: 1000px; /* needed for 3D rotation */
+  perspective: 1000px; /* 3D perspective for rotation */
 }
 
 /* TOP TEXT */
@@ -25,7 +25,7 @@ body {
   width: 100%;
   text-align: center;
   font-size: 2.5em;
-  z-index: 50; /* above rose and petals */
+  z-index: 50;
   text-shadow: 0 0 10px red, 0 0 20px red;
 }
 
@@ -36,18 +36,17 @@ body {
   width: 100%;
   text-align: center;
   font-size: 1.6em;
-  z-index: 50; /* above rose and petals */
+  z-index: 50;
   text-shadow: 0 0 10px red;
 }
 
-/* ROSE EMOJI CENTERED */
+/* ROTATING & FLOATING ROSE */
 #rose {
   position: absolute;
   top: 50%;
   left: 50%;
   font-size: 180px; /* size of the rose */
   transform: translate(-50%, -50%);
-  animation: rotateY 5s linear infinite;
   z-index: 40; /* above petals, below text */
   text-shadow:
     0 0 5px #ff4d6d,
@@ -55,6 +54,16 @@ body {
     0 0 30px #ff0033,
     0 5px 15px rgba(0,0,0,0.5);
   transform-style: preserve-3d;
+  animation: floatRotateY 5s ease-in-out infinite;
+}
+
+/* FLOAT UP/DOWN + Y-ROTATION */
+@keyframes floatRotateY {
+  0%   { transform: translate(-50%, -50%) translateY(0) rotateY(0deg); }
+  25%  { transform: translate(-50%, -50%) translateY(-15px) rotateY(90deg); }
+  50%  { transform: translate(-50%, -50%) translateY(-30px) rotateY(180deg); }
+  75%  { transform: translate(-50%, -50%) translateY(-15px) rotateY(270deg); }
+  100% { transform: translate(-50%, -50%) translateY(0) rotateY(360deg); }
 }
 
 /* PETALS */
@@ -66,12 +75,6 @@ body {
   border-radius: 50% 50% 60% 60%;
   animation: fall linear infinite;
   z-index: 30; /* behind rose */
-}
-
-/* ROTATE ROSE */
-@keyframes rotateY {
-  from { transform: translate(-50%, -50%) rotateY(0deg); }
-  to   { transform: translate(-50%, -50%) rotateY(360deg); }
 }
 
 /* FALLING PETALS */
@@ -87,20 +90,18 @@ body {
 
 <div id="title">Karen te quiero mucho</div>
 
-<!-- ROTATING ROSE -->
+<!-- ROTATING & FLOATING ROSE -->
 <div id="rose">🌹</div>
 
 <div id="bottomText">Te quiero ver cada minuto</div>
 
 <script>
-// PETALS
+// Generate falling petals
 for (let i = 0; i < 40; i++) {
   const p = document.createElement("div");
   p.className = "petal";
-
   p.style.left = Math.random() * 100 + "vw";
   p.style.animationDuration = (4 + Math.random()*4) + "s";
-
   document.body.appendChild(p);
 }
 </script>
